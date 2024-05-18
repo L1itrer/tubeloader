@@ -3,11 +3,11 @@
 init_vars()
 {
     link=""
-    format=""
+    format="mp4"
     audio_or_video="Video"
     directory="./videos"
     max_resolution=""
-    quality=0
+    quality=5
 }
 
 get_link()
@@ -34,17 +34,34 @@ get_type()
     audio_or_video=$(zenity --list --column=MENU "${audio_or_video_menu[@]}" --height 300 --title "Tubeloader" --text "Choose a format type")
     if [[ -z $audio_or_video ]]; then
     audio_or_video=$temp
+    elif [[ $audio_or_video == "Audio" ]]; then
+    format="mp3"
+    elif [[ $audio_or_video == "Video" ]]; then
+    format="mp4"
     fi
 }
 
 get_format()
 {
-    echo "lol"
+    temp=$format
+    if [[ $audio_or_video == "Video" ]]; then
+    format_options=("mp4" "mov" "webm" "flv")
+    else
+    format_options=("wav" "flac" "opus" "mp3" "ogg")
+    fi
+    format=$(zenity --list --column=MENU "${format_options[@]}" --width 840 --height 500 --title "Tubeloader")
+    if [[ -z $format ]]; then
+    format=$temp
+    fi
 }
 
 get_path()
 {
-    echo "lol"
+    temp=$directory
+    directory=$(zenity --file-selection --title "Select a directory" --directory)
+    if [[ -z $directory ]]; then
+    directory=$temp
+    fi
 }
 
 get_resolution()
@@ -54,7 +71,11 @@ get_resolution()
 
 get_quality()
 {
-    echo "lol"
+    temp=$quality
+    quality=$(zenity --scale --text "Choose audio quality (0 for best, 10 for worst)" --min-value 0 --max-value 10 --value 5)
+    if [[ -z $quality ]]; then
+    quality=$temp
+    fi
 }
 
 download()
@@ -63,6 +84,14 @@ download()
 }
 
 init_vars
+test=$(yt-dlp --version)
+if [[ -z $test ]]; then
+echo "This script requires yt-dlp to run properly"
+exit 1
+else
+yt-dlp -U
+fi
+
 while true; do
     menu1="Current link: $link"
     menu2="Type: $audio_or_video"
@@ -91,10 +120,12 @@ while true; do
         "$menu3")
         ;;
         "$menu4")
+        get_path
         ;;
         "$menu5")
         ;;
         "$menu6")
+        get_quality
         ;;
         "$menu7")
         ;;
