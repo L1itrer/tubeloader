@@ -6,7 +6,7 @@ init_vars()
     format="mp4"
     audio_or_video="Video"
     directory="./videos"
-    max_resolution=""
+    max_resolution="720"
     quality=5
 }
 
@@ -66,7 +66,13 @@ get_path()
 
 get_resolution()
 {
-    echo "lol"
+    temp=$max_resolution
+    resolution_options=("144" "240" "360" "480" "720" "1080" "1440")
+    max_resolution=$(zenity --list --column=MENU "${resolution_options[@]}" --height 500 --title "Tubeloader")
+    if [[ -z $max_resolution ]]; then
+    max_resolution=$temp
+    fi
+
 }
 
 get_quality()
@@ -80,7 +86,17 @@ get_quality()
 
 download()
 {
-    echo "lol"
+    if [[ $link == "" ]]; then
+    zenity --error --title "Tubeloader" --text "Please enter a valid download link"
+    return
+    fi
+    if [[ $audio_or_video == "Audio" ]]; then
+    command=" -x --audio-format $format"
+    else
+    command=" -f $format"
+    fi
+    out=$(yt-dlp $link -q --no-warnings $command --audio-quality $quality --windows-filenames --no-keep-video -P $directory 2>&1)
+    zenity --info --title "Tubeloader" --text="$out"
 }
 
 init_vars
@@ -106,7 +122,6 @@ while true; do
     choice=$(zenity --list --column=MENU "${Menu[@]}" --width 840 --height 500 --title "Tubeloader")
 
     if [[ -z $choice ]]; then
-    clear
     exit 0
     fi
 
@@ -118,19 +133,21 @@ while true; do
         get_type
         ;;
         "$menu3")
+        get_format
         ;;
         "$menu4")
         get_path
         ;;
         "$menu5")
+        get_resolution
         ;;
         "$menu6")
         get_quality
         ;;
         "$menu7")
+        download
         ;;
         "$menu8")
-        clear
         exit 0
         ;;
     esac
