@@ -96,6 +96,9 @@ download()
     command=" -f $format"
     fi
     out=$(yt-dlp $link -q --no-warnings $command --audio-quality $quality --windows-filenames --no-keep-video -P $directory 2>&1)
+    if [[ $out == "" ]]; then
+    out="Download successful"
+    fi
     zenity --info --title "Tubeloader" --text="$out"
 }
 
