@@ -1,4 +1,62 @@
 #!/bin/bash
+# Author           : Mateusz Rzęsa ( email )
+# Created On       : 13.05.2024
+# Last Modified By : Imie Nazwisko ( email )
+# Last Modified On : 19.05.2024 
+# Version          : 2024.05.19
+#
+# Description      : A simple bash script for downloading Youtube videos
+#                    and/or audio files with some customizations. Reliant
+#                    on yt-dlp, therefore most of the credit should go to
+#                    the creators and contributors of that project.
+# Dependencies     : yt-dlp, FFmpeg, zenity
+#
+# Licensed under GPL (see /usr/share/common-licenses/GPL for more details
+# or contact # the Free Software Foundation for a copy)
+VERSION="2024.05.19"
+AUTHOR="Mateusz Rzęsa"
+
+display_version()
+{
+    echo "Tubeloader"
+    echo "Version: $VERSION"
+    echo "Author: $AUTHOR"
+}
+
+display_help()
+{
+    display_version
+    echo "-h for help"
+    echo "-v for version"
+    echo "Script simplifies the downloading of youtube videos from a given youtube link."
+    echo "Select \"Link\" to paste a youtube link."
+    echo "Select \"Type\" to choose between downloading audio or video file"
+    echo "Select \"Format\" to choose your preferred file format (if available)"
+    echo "Select \"Path do download\" to choose a directory you want the files to be downloaded to"
+    echo "Select \"Max resolution\" to pick your preferred resolution. The script will download the best available resolution not greater then the one chosen by you"
+    echo "Select \"Download\" to download the pasted youtube link"
+    echo "Select \"Quit\" or click cancel to exit the script"
+}
+
+is_zenity_installed()
+{
+    test=$(zenity --version)
+    if [[ -z $test ]]; then
+    echo "This script requires zenity to run properly, please install zenity"
+    exit 1
+    fi
+}
+
+is_yt_dlp_installed()
+{
+    test=$(yt-dlp --version)
+    if [[ -z $test ]]; then
+    zenity --error --title "Tubeloader" --text "This script requires yt-dlp to run properly. Installation instructions at: https://github.com/yt-dlp/yt-dlp"
+    exit 1
+    else
+    yt-dlp -U
+    fi
+}
 
 init_vars()
 {
@@ -109,14 +167,33 @@ download()
     zenity --info --title "Tubeloader" --text="$out"
 }
 
+
+
+##########################################################
+######Script execution begins from this point onward######
+##########################################################
+
+while getopts ":hv" opt; do
+    case ${opt} in
+        h )
+            display_help
+            exit 0
+            ;;
+        v )
+            display_version
+            exit 0
+            ;;
+        \? )
+            echo "Unknown option. -h for help"
+            exit 1
+            ;;
+    esac
+done
+is_zenity_installed
+is_yt_dlp_installed
+
 init_vars
-test=$(yt-dlp --version)
-if [[ -z $test ]]; then
-echo "This script requires yt-dlp to run properly"
-exit 1
-else
-yt-dlp -U
-fi
+
 
 while true; do
     menu1="Current link: $link"
