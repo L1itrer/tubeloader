@@ -31,7 +31,7 @@ get_type()
 {
     temp=$audio_or_video
     audio_or_video_menu=("Audio" "Video")
-    audio_or_video=$(zenity --list --column=MENU "${audio_or_video_menu[@]}" --height 300 --title "Tubeloader" --text "Choose a format type")
+    audio_or_video=$(zenity --list --column=Select "${audio_or_video_menu[@]}" --height 300 --title "Tubeloader" --text "Choose a format type")
     if [[ -z $audio_or_video ]]; then
     audio_or_video=$temp
     elif [[ $audio_or_video == "Audio" ]]; then
@@ -49,7 +49,7 @@ get_format()
     else
     format_options=("wav" "flac" "opus" "mp3" "ogg")
     fi
-    format=$(zenity --list --column=MENU "${format_options[@]}" --width 840 --height 500 --title "Tubeloader")
+    format=$(zenity --list --column=Select "${format_options[@]}" --width 840 --height 500 --title "Tubeloader")
     if [[ -z $format ]]; then
     format=$temp
     fi
@@ -68,7 +68,7 @@ get_resolution()
 {
     temp=$max_resolution
     resolution_options=("144" "240" "360" "480" "720" "1080" "1440")
-    max_resolution=$(zenity --list --column=MENU "${resolution_options[@]}" --height 500 --title "Tubeloader")
+    max_resolution=$(zenity --list --column=Select "${resolution_options[@]}" --height 500 --title "Tubeloader")
     if [[ -z $max_resolution ]]; then
     max_resolution=$temp
     fi
@@ -86,14 +86,21 @@ get_quality()
 
 download()
 {
+    command=""
     if [[ $link == "" ]]; then
     zenity --error --title "Tubeloader" --text "Please enter a valid download link"
     return
     fi
+    if [[ $link == *"&list"* ]] || [[ $link == *"playlist"* ]]; then
+    zenity --question --text "The link appears to be a playlist link, do you want to download the whole playlist?"
+        if [[  $? == 1 ]]; then
+        command+=" --no-playlist"
+        fi
+    fi
     if [[ $audio_or_video == "Audio" ]]; then
-    command=" -x --audio-format $format"
+    command+=" -x --audio-format $format"
     else
-    command=" -f $format"
+    command+=" -f $format -S res:$max_resolution"
     fi
     out=$(yt-dlp $link -q --no-warnings $command --audio-quality $quality --windows-filenames --no-keep-video -P $directory 2>&1)
     if [[ $out == "" ]]; then
