@@ -16,6 +16,7 @@
 VERSION="2024.05.19"
 AUTHOR="Mateusz Rzęsa"
 
+#Displays information about the version
 display_version()
 {
     echo "Tubeloader"
@@ -23,6 +24,7 @@ display_version()
     echo "Author: $AUTHOR"
 }
 
+#Displays information about the author
 display_help()
 {
     display_version
@@ -38,6 +40,7 @@ display_help()
     echo "Select \"Quit\" or click cancel to exit the script"
 }
 
+#Check for the instalation of zenity
 is_zenity_installed()
 {
     test=$(zenity --version)
@@ -47,17 +50,18 @@ is_zenity_installed()
     fi
 }
 
+#Check for the installation of yt-dlp, and download and update it if unavailable
 is_yt_dlp_installed()
 {
-    test=$(yt-dlp --version)
-    if [[ -z $test ]]; then
-    zenity --error --title "Tubeloader" --text "This script requires yt-dlp to run properly. Installation instructions at: https://github.com/yt-dlp/yt-dlp"
-    exit 1
-    else
-    yt-dlp -U
+    if ! type "yt-dlp" > /dev/null ; then
+    sudo add-apt-repository ppa:tomtomtom/yt-dlp    # Add ppa repo to apt
+    sudo apt update                                 # Update package list
+    sudo apt install yt-dlp                         # Install yt-dlp
     fi
+
 }
 
+#Create variables for the script and assign them default values
 init_vars()
 {
     link=""
@@ -68,6 +72,7 @@ init_vars()
     quality=5
 }
 
+#Function to get link from the user, will loop until the link is valid or cancel button is clicked
 get_link()
 {
     while true; do
@@ -85,6 +90,7 @@ get_link()
     done
 }
 
+#Function to get the type from the menu (an audio file or video file), will assign a default format upon change of type
 get_type()
 {
     temp=$audio_or_video
@@ -99,6 +105,7 @@ get_type()
     fi
 }
 
+#Function to get the format of a file from a menu
 get_format()
 {
     temp=$format
@@ -113,6 +120,7 @@ get_format()
     fi
 }
 
+#Function to get the download directory, uses zenity for selection
 get_path()
 {
     temp=$directory
@@ -122,6 +130,7 @@ get_path()
     fi
 }
 
+#Function to get a max resolution from a menu
 get_resolution()
 {
     temp=$max_resolution
@@ -133,6 +142,7 @@ get_resolution()
 
 }
 
+#Function to select quality from a slider
 get_quality()
 {
     temp=$quality
@@ -142,6 +152,7 @@ get_quality()
     fi
 }
 
+#Final function to download, creates a function link
 download()
 {
     command=""
